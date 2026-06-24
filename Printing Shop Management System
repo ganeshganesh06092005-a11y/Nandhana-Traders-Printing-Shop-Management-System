@@ -1,0 +1,940 @@
+from customtkinter import *
+from PIL import Image
+import tkinter
+from customtkinter import CTk, CTkFrame, CTkLabel, CTkEntry, CTkButton
+from tkinter import END
+from pymongo import MongoClient
+import sys
+import tree
+import uuid
+from tkinter import messagebox
+from tkinter import ttk
+from tkinter import Scrollbar
+import openpyxl
+import matplotlib
+
+#database  ECONNREFUSED 127.0.0.1:27017, connect ECONNREFUSED ::1:27017
+try:
+    client=MongoClient(port=27017)
+    db=client.maniraj
+    print("Connected to MongoDB")
+except:
+    print("Database connection Error ")
+    print("No connection could be made because the target machine actively refused it ")
+    tkinter.messagebox.showerror("Error", "Connection Error")
+    sys.exit(1)
+
+
+def register():
+    global username
+    global password
+    global email
+
+    
+    username = regnamee.get()
+    password = regpasse.get()
+    email = regemaile.get()
+
+    if db.user.find_one({'username': username}):
+        messagebox.showerror("Error", "Username already exists!")
+        regnamee.delete(0, END)
+        regpasse.delete(0, END)
+        regemaile.delete(0, END)
+    else:
+        dic={'username': username, 'password': password,'email': email}
+        db.user.insert_one(dic)
+        messagebox.showinfo("Success", "Registration Successful!")
+        regnamee.delete(0, END)
+        regpasse.delete(0, END)
+        regemaile.delete(0, END)
+        reg_page.destroy()
+        homefun()
+
+def login():
+    username = lognamee.get()
+    password = logpasse.get()
+    
+    if db.user.find_one({'username': username, 'password': password}):
+        messagebox.showinfo("Login Successful", "Welcome to App, " + username)
+        lognamee.delete(0, END)
+        logpasse.delete(0, END)
+        login_page.destroy()
+        homefun()
+    else:
+        messagebox.showerror("Login Failed", "Invalid username or password")
+        lognamee.delete(0, END)
+        logpasse.delete(0, END)
+
+def logout():
+    homewin_page.destroy()
+    loginfun()
+################ REGISTER PAGE ######################################################################    
+#Register Page   
+def registerfun():
+    global reg_page
+    global regnamee
+    global regemaile
+    global regpasse
+    
+    reg_page=CTk(fg_color="sky blue")
+    reg_page.geometry("1366x768")
+    set_appearance_mode("system")
+
+    reglo=CTkLabel(master=reg_page, text="NANDHANA TRADERS", font=("inter",50,"bold"),text_color="gray")
+    reglo.place(relx=0.3, rely=0.0)
+        
+    regf =CTkFrame(master=reg_page,width=450,height=550,corner_radius=30)
+    regf.place(relx=0.5, rely=0.5, anchor="center",)
+
+    regl=CTkLabel(regf, text="Register", font=("inter",50))
+    regl.place(relx=0.1, rely=0.1)
+
+    reggsl=CTkLabel(regf, text="Geting Start", font=("inter",25))
+    reggsl.place(relx=0.1, rely=0.2)
+
+    # Load and Display Image
+    img = CTkImage(light_image=Image.open("C:/Users/vinay/Downloads/print of image.png"), size=(130, 130))  # Replace "your_image.png" with your actual image file
+    img_label = CTkLabel(regf, image=img, text="")  # Empty text to display only the image
+    img_label.place(relx=0.6, rely=0.05)  # Adjust placement for correct alignment
+
+    regnamel=CTkLabel(regf, text="Name ", font=("inter",20))
+    regnamel.place(relx=0.1, rely=0.3)
+
+    regnamee=CTkEntry(regf,placeholder_text="username", width=350,height=30, corner_radius=11)
+    regnamee.place(relx=0.1, rely=0.35)
+
+    regemaill=CTkLabel(regf, text="Email", font=("inter",20))
+    regemaill.place(relx=0.1, rely=0.45)
+
+    regemaile=CTkEntry(regf,placeholder_text="email",width=350,height=30, corner_radius=11)
+    regemaile.place(relx=0.1, rely=0.50)
+
+    regpassl=CTkLabel(regf, text="Password", font=("inter",20))
+    regpassl.place(relx=0.1, rely=0.60)
+
+    regpasse=CTkEntry(regf,placeholder_text="password",width=350,height=30, corner_radius=11,show="*")
+    regpasse.place(relx=0.1, rely=0.65)
+
+    def regfun():
+        reg_page.destroy()
+        loginfun()
+
+    regb=CTkButton(regf,text="Register", font=("inter",20),width=350,height=30, corner_radius=11,command=register)
+    regb.place(relx=0.1, rely=0.75)
+
+    regall=CTkLabel(regf, text="Already hava an account ? ", font=("inter",20))
+    regall.place(relx=0.2, rely=0.85)
+
+    reglogb=CTkButton(regf, text="Login ", font=("inter",20,"underline"),width=35,height=2 ,text_color='sky blue',fg_color="transparent",command=regfun)
+    reglogb.place(relx=0.7, rely=0.85)
+    reg_page.mainloop()
+################ LOGIN PAGE ######################################################################
+#Login Page 
+def loginfun():
+    global login_page
+    global lognamee
+    global logpasse
+
+    # Create login window
+    login_page = CTk(fg_color="sky blue")
+    login_page.geometry("1400x800")
+    set_appearance_mode("system")
+
+    # Title Label
+    loglo = CTkLabel(master=login_page, text="NANDHANA TRADERS", font=("inter", 50, "bold"), text_color="gray")
+    loglo.place(relx=0.3, rely=0.0)
+
+    # Login Frame
+    logf = CTkFrame(master=login_page, width=450, height=550, corner_radius=20)
+    logf.place(relx=0.5, rely=0.5, anchor="center")
+
+    # Login Label
+    logll = CTkLabel(logf, text="Login", font=("inter", 50))
+    logll.place(relx=0.1, rely=0.1)
+
+    # Load and Display Image
+    img = CTkImage(light_image=Image.open("C:/Users/vinay/Downloads/print of image.png"), size=(130, 130))  # Replace "your_image.png" with your actual image file
+    img_label = CTkLabel(logf, image=img, text="")  # Empty text to display only the image
+    img_label.place(relx=0.6, rely=0.05)  # Adjust placement for correct alignment
+
+    # Welcome Label
+    logwl = CTkLabel(logf, text="Hey, Welcome Guys", font=("inter", 20))
+    logwl.place(relx=0.1, rely=0.2)
+
+    # Username Label & Entry
+    lognamel = CTkLabel(logf, text="User Name", font=("inter", 15))
+    lognamel.place(relx=0.1, rely=0.3)
+
+    lognamee = CTkEntry(logf, placeholder_text="Enter Your User Name", width=350, height=30, corner_radius=8)
+    lognamee.place(relx=0.1, rely=0.35)
+
+    # Password Label & Entry
+    logpassl = CTkLabel(logf, text="Password", font=("inter", 15))
+    logpassl.place(relx=0.1, rely=0.45)
+
+    logpasse = CTkEntry(logf, placeholder_text="Enter Your Password", width=350, height=30, corner_radius=8, show='*')
+    logpasse.place(relx=0.1, rely=0.50)
+
+    # Login Button
+    loginb = CTkButton(logf, text="Login", font=("inter", 20), width=350, height=30, corner_radius=8, command=login)
+    loginb.place(relx=0.1, rely=0.65)
+
+    # Function to open Register Page
+    def logfun():
+        login_page.destroy()
+        registerfun()
+
+    # New Account Label & Button
+    lognewl = CTkLabel(logf, text="New Account Create?", font=("inter", 20))
+    lognewl.place(relx=0.2, rely=0.80)
+
+    logl = CTkButton(logf, text="Register", font=("inter", 20, "bold"), text_color='blue', fg_color="transparent", command=logfun)
+    logl.place(relx=0.6, rely=0.80)
+
+    login_page.mainloop()
+
+#Home Page
+def homefun():
+    global sales_treeview
+    global homewin_page
+    global export_sales_to_excel
+    global export_purchase_to_excel
+    
+    homewin_page=CTk(fg_color="#87ebd6")
+    homewin_page.geometry("1366x768")
+    set_appearance_mode("system")
+
+    home_frame = CTkFrame(homewin_page, width=1500, height=150, fg_color="black")
+    home_frame.place(relx=0.01,rely=0.01)
+        
+    title_label = CTkLabel(home_frame, text="NANDHANA TRADERS", font=("inter", 40,"bold"),text_color="red")
+    title_label.place(anchor="center",relx=0.4,rely=0.2)
+
+    # Function to create menu buttons
+    def create_menu_button(text, command, x_placement):
+        button = CTkButton(home_frame, text=text, font=("inter", 25,"bold"), fg_color="transparent", command=command, hover_color="black")
+        button.place(rely=0.5, relx=x_placement)
+        return button
+
+    # Menu buttons
+    x_placement = 0.15
+    overview_button = create_menu_button("Overview", overview, x_placement)
+    x_placement += 0.1
+    inventory_button = create_menu_button("Stock", stock, x_placement)
+    x_placement += 0.1
+    purchase_button = create_menu_button("Purchase", purchase, x_placement)
+    x_placement += 0.1
+    so_button=create_menu_button("sales", sales,x_placement)
+    x_placement += 0.1           
+    
+
+    customer_button = create_menu_button("Customer", customer, x_placement)
+
+    logout_button = CTkButton(home_frame, text="Logout", font=("inter", 20), width=35, height=30,command=logout)
+    logout_button.place(anchor="ne",relx=0.8,rely=0.5)
+    
+    homewin_page.mainloop()
+
+    
+def export_sales_to_excel():
+    
+    # Create a new Excel workbook
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Sales Data"
+
+        # Write headers
+        headers = ['Product Name', 'Product ID','Price', 'Quantity', 'Total Amount']
+        for col, header in enumerate (headers, start=1):
+            ws.cell(row=1, column=col, value=header)
+
+            # Iterate through Treeview data and write to Excel
+        for row, item in enumerate (sales_treeview.get_children(), start=2):
+            values = sales_treeview.item(item)['values']
+            
+                # Assuming 'values' contains [product_name, product_id, quantity, price, total_amount]
+            for col, value in enumerate (values, start=1):
+                ws.cell(row=row, column=col, value=value)
+
+        # Save the Excel file
+        wb.save("C:/Users/vinay/Documents/sales.xlsx")
+
+
+def export_purchase_to_excel():
+    # Create a new Excel workbook
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Purchase Data"
+
+        # Write headers
+        headers = ['Product Name', 'Product ID', 'Quantity', 'Price', 'Total Amount']
+        for col, header in enumerate(headers, start=1):
+            ws.cell(row=1, column=col, value=header)
+
+        # Iterate through Treeview data and write to Excel
+        for row, item in enumerate(purchase_treeview.get_children(), start=2):
+            values = purchase_treeview.item(item)['values']
+            # Assuming 'values' contains [product_name, product_id, quantity, price, total_amount]
+            for col, value in enumerate(values, start=1):
+                ws.cell(row=row, column=col, value=value)
+
+        # Save the Excel file
+        wb.save("C:/Users/vinay/Documents/purchase_data.xlsx") 
+
+def export_customer_to_excel():
+    # Create a new Excel workbook
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Customer Data"
+
+        # Write headers
+        headers = ['Product Name', 'Product ID','Customer Name', 'Quantity', 'Price', 'Total Amount','Contact']
+        for col, header in enumerate(headers, start=1):
+            ws.cell(row=1, column=col, value=header)
+
+        # Iterate through Treeview data and write to Excel
+        for row, item in enumerate(customer_treeview.get_children(), start=2):
+            values = customer_treeview.item(item)['values']
+            # Assuming 'values' contains [product_name, product_id, quantity, price, total_amount]
+            for col, value in enumerate(values, start=1):
+                ws.cell(row=row, column=col, value=value)
+
+        # Save the Excel file
+        wb.save("C:/Users/vinay/Documents/customer.xlsx")
+
+def slov():
+    global sales_treeview
+    global export_sales_to_excel
+    
+    slov_frame = CTkFrame(overview_frame, width=1200, height=450, fg_color="white")
+    slov_frame.place(relx=0.1, rely=0.2)
+
+    # Create and place Treeview widget
+    
+    sales_treeview = ttk.Treeview(slov_frame, columns=('Product Name', 'Product ID', 'Quantity', 'Price', 'Total Amount'), show='headings')
+    sales_treeview.heading('Product Name', text='Product Name', anchor='center')
+    sales_treeview.heading('Product ID', text='Product ID', anchor='center')
+    sales_treeview.heading('Quantity', text='Quantity', anchor='center')
+    sales_treeview.heading('Price', text='Price', anchor='center')
+    sales_treeview.heading('Total Amount', text='Total Amount', anchor='center')
+    sales_treeview.column('Product Name', width=120,anchor='center')
+    sales_treeview.column('Product ID', width=45,anchor='center')
+    sales_treeview.column('Quantity', width=30,anchor='center')
+    sales_treeview.column('Price', width=30,anchor='center')
+    sales_treeview.column('Total Amount', width=80,anchor='center')
+    sales_treeview.place(relx=0.01, rely=0.01, relwidth=0.98, relheight=0.88)
+
+
+    scrollbar = Scrollbar(slov_frame, orient="vertical", command=sales_treeview.yview)
+    scrollbar.place(anchor="ne",relx=0.01, rely=0.01, relheight=0.88)
+
+
+# Configure Treeview to use the scrollbar
+    sales_treeview.config(yscrollcommand=scrollbar.set)
+    # Clear existing items in the Treeview
+    for row in sales_treeview.get_children():
+        sales_treeview.delete(row)
+
+    # Sample data retrieval from the database (replace this with your actual database query)
+    for index, sales_data in enumerate(db.sales.find(), start=1):
+        sales_treeview.insert('', 'end', values=(
+            sales_data['NAME'],
+            sales_data['ID'],
+            sales_data['QTY'],
+            sales_data['PRICE'],
+            sales_data['AMT']
+        ))
+
+    # Configure Treeview style
+    style = ttk.Style()
+    style.configure("Treeview", font=("Roboto", 13))
+    style.configure("Treeview.Heading", font=("Roboto", 14, "bold"), foreground="red")
+
+    # Start the tkinter main loop
+    slov_frame.mainloop()
+
+   
+
+def purov():
+    purov_frame=CTkFrame(overview_frame,width=1200,height=450,fg_color="white")
+    purov_frame.place(relx=0.1,rely=0.2)
+
+    # Create and place Treeview widget
+    global purchase_treeview
+    purchase_treeview = ttk.Treeview(purov_frame, columns=( 'Product Name','Product ID', 'Quantity', 'Price', 'Total Amount'), show='headings')
+    purchase_treeview.heading('Product Name', text='Product Name', anchor='center')
+    purchase_treeview.heading('Product ID', text='Product ID', anchor='center')
+    purchase_treeview.heading('Quantity', text='Quantity', anchor='center')
+    purchase_treeview.heading('Price', text='Price', anchor='center')
+    purchase_treeview.heading('Total Amount', text='Total Amount', anchor='center')
+    
+    purchase_treeview.column('Product Name', width=120,anchor='center')
+    purchase_treeview.column('Product ID', width=45,anchor='center')
+    purchase_treeview.column('Quantity', width=30,anchor='center')
+    purchase_treeview.column('Price', width=30,anchor='center')
+    purchase_treeview.column('Total Amount', width=80,anchor='center')
+    purchase_treeview.place(relx=0.01, rely=0.01, relwidth=0.98, relheight=0.95)
+
+    scrollbar = Scrollbar(purov_frame, orient="vertical", command=purchase_treeview.yview)
+    scrollbar.place(anchor="ne",relx=0.01, rely=0.01, relheight=0.95)
+    
+
+# Configure Treeview to use the scrollbar
+    purchase_treeview.config(yscrollcommand=scrollbar.set)
+    
+
+
+    # Clear existing items in the Treeview
+    for row in purchase_treeview.get_children():
+        purchase_treeview.delete(row)
+
+    # Sample data retrieval from the database (replace this with your actual database query)
+    for index ,purchase_data in enumerate(db.purchase.find(), start=1):
+        purchase_treeview.insert('', 'end', values=(
+            purchase_data['product_name'],
+            purchase_data['product_id'],
+            purchase_data['product_quantity'],
+            purchase_data['product_price'],
+            purchase_data['product_amount']
+
+        ))
+
+    # Configure Treeview style
+    style = ttk.Style()
+    style.configure("Treeview", font=("Roboto", 13))
+    style.configure("Treeview.Heading", font=("Roboto", 14, "bold"), foreground="red")
+
+    purov_frame.mainloop()
+
+
+
+
+    
+def cusov():
+    cusov_frame=CTkFrame(overview_frame,width=1200,height=450,fg_color="white")
+    cusov_frame.place(relx=0.1,rely=0.2)
+
+    # Create and place Treeview widget
+    global customer_treeview
+    customer_treeview = ttk.Treeview(cusov_frame, columns=( 'Product Name','Product ID','Customer Name', 'Quantity', 'Price', 'Total Amount','Customer Contact'), show='headings')
+    customer_treeview.heading('Product Name', text='Product Name', anchor='center')
+    customer_treeview.heading('Product ID', text='Product ID', anchor='center')
+    customer_treeview.heading('Customer Name', text='Customer Name', anchor='center')
+    customer_treeview.heading('Quantity', text='Quantity', anchor='center')
+    customer_treeview.heading('Price', text='Price', anchor='center')
+    customer_treeview.heading('Total Amount', text='Total Amount', anchor='center')
+    customer_treeview.heading('Customer Contact', text='Customer Contact', anchor='center')
+    
+    customer_treeview.column('Product Name', width=120,anchor='center')
+    customer_treeview.column('Product ID', width=45,anchor='center')
+    customer_treeview.column('Customer Name', width=45,anchor='center')
+    customer_treeview.column('Quantity', width=30,anchor='center')
+    customer_treeview.column('Price', width=30,anchor='center')
+    customer_treeview.column('Total Amount', width=80,anchor='center')
+    customer_treeview.column('Customer Contact', width=80,anchor='center')
+    
+    customer_treeview.place(relx=0.01, rely=0.01, relwidth=0.98, relheight=0.95)
+
+    scrollbar = Scrollbar(cusov_frame, orient="vertical", command=customer_treeview.yview)
+    scrollbar.place(anchor="ne",relx=0.01, rely=0.01, relheight=0.95)
+
+# Configure Treeview to use the scrollbar
+    customer_treeview.config(yscrollcommand=scrollbar.set)
+
+
+    # Clear existing items in the Treeview
+    for row in customer_treeview.get_children():
+        customer_treeview.delete(row)
+
+    # Sample data retrieval from the database (replace this with your actual database query)
+    for index ,customer_data in enumerate(db.customer.find(), start=1):
+        customer_treeview.insert('', 'end', values=(
+            customer_data['product_name'],
+            customer_data['product_id'],
+            customer_data['customer_name'],
+            customer_data['product_quantity'],
+            customer_data['product_price'],
+            customer_data['product_amount'],
+            customer_data['customer_contact']
+            
+
+        ))
+
+    # Configure Treeview style
+    style = ttk.Style()
+    style.configure("Treeview", font=("Roboto", 13))
+    style.configure("Treeview.Heading", font=("Roboto", 14, "bold"), foreground="red")
+
+    cusov_frame.mainloop()
+
+############### OVERVIEW ########################################  
+def overview():
+    global overview_frame
+    overview_frame = CTkFrame(homewin_page, width=1500, height=600)
+    overview_frame.place(relx=0.01, rely=0.23)
+
+    oslbutn=CTkButton(overview_frame,text="sales",font=("inter",20),command=slov)
+    oslbutn.place(relx=0.1,rely=0.1)
+
+    opcbutn=CTkButton(overview_frame,text="purchase",font=("inter",20),command=purov)
+    opcbutn.place(relx=0.4,rely=0.1)
+
+    octbutn=CTkButton(overview_frame,text="customer",font=("inter",20),command=cusov)
+    octbutn.place(relx=0.7,rely=0.1)
+
+    export_button = CTkButton(overview_frame, text="Sales Report", font=("inter", 15,), width=100, height=50,command=export_sales_to_excel)
+    export_button.place(relx=0.01, rely=0.30)
+
+    Pexport_button = CTkButton(overview_frame, text="Purchase Report", font=("inter", 15,), width=100, height=50,command=export_purchase_to_excel)
+    Pexport_button.place(relx=0.01, rely=0.50)
+
+    cxport_button = CTkButton(overview_frame, text="Customer Report", font=("inter", 15,), width=100, height=50,command=export_customer_to_excel)
+    cxport_button.place(relx=0.01, rely=0.70)
+    
+############### STOCK ########################################  
+def stock():
+
+    global stock_frame
+        # Create the stock frame
+    stock_frame = CTkFrame(homewin_page, width=1500, height=600, fg_color="black")
+    stock_frame.place(relx=0.01, rely=0.23)
+
+    def tree():
+        # Clear existing items in the Treeview
+        for row in stock_treeview.get_children():
+            stock_treeview.delete(row)
+
+        # Sample data retrieval from the database (replace this with your actual database query)
+        for index ,stock_data in enumerate(db.stock.find(), start=1):
+            stock_treeview.insert('', 'end', values=(
+                stock_data['product_id'],
+                stock_data['product_name'],
+                stock_data['product_quantity']
+            ))
+   
+    # Configure Treeview style
+    style = ttk.Style()
+    style.configure("Treeview", font=("Roboto", 13))
+    style.configure("Treeview.Heading", font=("Roboto", 14, "bold"), foreground="red")
+
+    # Create and place Treeview widget
+    global stock_treeview
+    stock_treeview = ttk.Treeview(stock_frame, columns=( 'Product Name','Product ID', 'Quantity'), show='headings')
+
+    #stock_treeview.heading('S.No', text='S.No', anchor='center')    
+    stock_treeview.heading('Product ID', text='Product Name', anchor='center')
+    stock_treeview.heading('Product Name', text='Product ID', anchor='center')
+    stock_treeview.heading('Quantity', text='Quantity', anchor='center')
+    
+    #stock_treeview.column('S.No', width=20,anchor='center')
+    stock_treeview.column('Product ID', width=120,anchor='center')
+    stock_treeview.column('Product Name', width=45,anchor='center')
+    stock_treeview.column('Quantity', width=30,anchor='center')
+
+    stock_treeview.place(relx=0.01,rely=0.16,relwidth=0.98,relheight=0.80)
+    
+    scrollbar = Scrollbar(stock_frame, orient="vertical", command=stock_treeview.yview)
+    scrollbar.place(anchor="ne",relx=0.01, rely=0.16, relheight=0.80)
+
+     #Configure Treeview to use the scrollbar
+    stock_treeview.config(yscrollcommand=scrollbar.set)
+    
+        # Label for "Stock"
+    stock_txt = "Stock"
+    stock_label = CTkLabel(stock_frame, text=stock_txt, font=("inter", 30, "bold"), text_color="white")
+    stock_label.place(relx=0.02, rely=0.10)
+
+    def export_to_excel():
+    # Create a new Excel workbook
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Stock Data"
+
+        # Write headers
+        headers = ['Product Name', 'Product ID','Quantity']
+        for col, header in enumerate(headers, start=1):
+            ws.cell(row=1, column=col, value=header)
+
+        # Iterate through Treeview data and write to Excel
+        for row, item in enumerate(stock_treeview.get_children(), start=2):
+            values = stock_treeview.item(item)['values']
+            for col, value in enumerate(values, start=1):
+                ws.cell(row=row, column=col, value=value)
+
+        # Save the Excel file
+        wb.save("C:/Users/vinay/Documents/stock_data.xlsx")
+
+ #Add a button to trigger the export
+    export_button = CTkButton(stock_frame, text="Export to Excel", command=export_to_excel)
+    export_button.place(relx=0.8, rely=0.10)
+    
+    tree()
+
+def prr():
+    product_name=pprone.get()
+    product_id=pproide.get()
+    product_price=pprope.get()
+    product_quantity=pproqe.get()
+    product_amount=pproae.get()
+    purchase_data={
+        "product_name":product_name,
+        "product_id":product_id,
+        "product_price":product_price,
+        "product_quantity":product_quantity,
+        "product_amount":product_amount,
+    }
+
+    if db.stock.count_documents({'product_name':product_name}, limit =1) == 0:
+        stock_info = {
+        "product_id": product_id,
+        "product_name": product_name,
+        "product_quantity": product_quantity}
+        db.stock.insert_one(stock_info)
+    else:
+        check = {"product_name":product_name}
+
+        data = db.stock.find_one(check)
+        totalstock = int(data['product_quantity']) + int(product_quantity)
+
+        change = {'$set':{'product_quantity':totalstock}}
+
+        db.stock.update_one(check,change)
+    
+    db.purchase.insert_one(purchase_data)
+    messagebox.showinfo("purchase","purchase Add Successful")
+
+
+############### PURCHASE ########################################      
+def purchase():
+    pass
+    purchase_frame = CTkFrame(homewin_page, width=1500, height=600,fg_color="black")
+    purchase_frame.place(relx=0.01, rely=0.23)
+
+    purchase_txt = "Purchase"
+    purchasel = CTkLabel(purchase_frame, text=purchase_txt, font=("inter", 30, "bold"), text_color="white")
+    purchasel.place(relx=0.02,rely=0.15)
+
+    def pur():
+        global pprone
+        global pproide
+        global pprope
+        global pproqe
+        global pproae
+        pur_frame=CTkFrame(homewin_page,width=950,height=380,fg_color="white",corner_radius=20)
+        pur_frame.place(relx=0.2,rely=0.4)    
+        def pur_close_window():
+            pur_frame.destroy()   
+
+        def cal_pur():
+            try:
+                product_price = int(pprope.get()) if pprope.get().strip() else 0  # Default to 0 if empty
+                product_quantity = int(pproqe.get()) if pproqe.get().strip() else 0  # Default to 0 if empty
+                product_amount = product_price * product_quantity
+                
+                pproae.delete(0, "end")  # Clear the previous amount
+                pproae.insert(0, str(product_amount))  # Insert new amount
+            except ValueError:
+                print("Invalid input: Please enter a valid number.")  # Handles non-numeric input
+
+        ppronl=CTkLabel(pur_frame,text="Product Name",font=("times new roman",30,"bold"),text_color="black")
+        ppronl.place(relx=0.02,rely=0.10)
+
+        pprone=CTkEntry(pur_frame,font=("times new roman",30,"bold"),width=250)
+        pprone.place(relx=0.3,rely=0.10)
+
+        pproidl=CTkLabel(pur_frame,text="Product ID",font=("times new roman",30,"bold"),text_color="black")
+        pproidl.place(relx=0.02,rely=0.30)
+
+        pproide=CTkEntry(pur_frame,font=("times new roman",30,"bold"),width=250)
+        pproide.place(relx=0.3,rely=0.30)
+
+        ppropl=CTkLabel(pur_frame,text="Product Price",font=("times new roman",30,"bold"),text_color="black")
+        ppropl.place(relx=0.02,rely=0.50)
+
+        pprope=CTkEntry(pur_frame,font=("times new roman",30,"bold"),width=250)
+        pprope.place(relx=0.3,rely=0.50)
+        pprope.bind("<KeyRelease>",lambda event: cal_pur())
+
+        pproql=CTkLabel(pur_frame,text="Product Quantity",font=("times new roman",30,"bold"),text_color="black")
+        pproql.place(relx=0.02,rely=0.70)
+
+        pproqe=CTkEntry(pur_frame,font=("times new roman",30,"bold"),width=250)
+        pproqe.place(relx=0.3,rely=0.70)
+        pproqe.bind("<KeyRelease>",lambda event: cal_pur())
+
+        pproal=CTkLabel(pur_frame,text="Total Amount",font=("times new roman",30,"bold"),text_color="black")
+        pproal.place(relx=0.6,rely=0.15)
+
+        pproae=CTkEntry(pur_frame,font=("times new roman",30,"bold"),width=250,height=150)
+        pproae.place(relx=0.6,rely=0.25)
+    
+
+        pprocb = CTkButton(pur_frame, text="Cancel",font=("inter", 15,),width=100, height=50,command=pur_close_window)
+        pprocb.place(relx=0.6, rely=0.80)
+
+        pproadb = CTkButton(pur_frame, text="Add",font=("inter", 15,),width=100, height=50,command=prr)
+        pproadb.place(relx=0.8, rely=0.80)
+
+    
+    purnewb = CTkButton(purchase_frame, text="Add New Purchase",font=("inter", 15,),width=80, height=35,command=pur)
+    purnewb.place(relx=0.75, rely=0.15)
+
+def slr():
+    product_name = slprone.get().strip()
+    product_id = slproide.get().strip()
+    
+    try:
+        product_price = int(slprope.get().strip()) if slprope.get().strip() else 0
+        product_quantity = int(slproqe.get().strip()) if slproqe.get().strip() else 0
+        product_amount = product_price * product_quantity  # Automatically calculate amount
+    except ValueError:
+        messagebox.showerror("Error", "Please enter valid numeric values for price and quantity.")
+        return
+
+    # Check if sales entry already exists
+    existing_sale = db.sales.find_one({"product_id": product_id})
+    if existing_sale:
+        messagebox.showwarning("Error", "Sales record for this product ID already exists!")
+        return
+
+    # Sales data dictionary
+    sales_data = {
+        "_id": str(uuid.uuid4()),  # Unique ID to prevent duplication
+        "NAME": product_name,
+        "ID": product_id,
+        "PRICE": product_price,
+        "QTY": product_quantity,
+        "AMT": product_amount
+    }
+
+    # Insert sales data
+    db.sales.insert_one(sales_data)
+    messagebox.showinfo("Sales", "Sales Add Successful")
+
+    # Check if product exists in stock
+    stock_entry = db.stock.find_one({"product_name": product_name, "product_id": product_id})
+
+    if not stock_entry:
+        messagebox.showerror("Error", "Product not found in stock!")
+        slprone.delete(0, END)
+        return
+
+    available_quantity = int(stock_entry["product_quantity"])
+
+    # Check stock availability
+    if available_quantity < product_quantity:
+        messagebox.showerror("Error", "Insufficient stock!")
+        slproqe.delete(0, END)
+        return
+
+    # Update stock quantity
+    updated_quantity = available_quantity - product_quantity
+    db.stock.update_one(
+        {"product_name": product_name, "product_id": product_id},
+        {"$set": {"product_quantity": updated_quantity}}
+    )
+
+    messagebox.showinfo("Stock Update", f"Stock updated successfully! Remaining: {updated_quantity}")
+             
+############### SALES ########################################      
+def sales():
+    pass
+    sales_frame = CTkFrame(homewin_page, width=1500, height=600,fg_color="black")
+    sales_frame.place(relx=0.01, rely=0.23)
+
+    sales_txt = "Sales"
+    salesl = CTkLabel(sales_frame, text=sales_txt, font=("inter", 30, "bold"), text_color="#ffffff")
+    salesl.place(relx=0.02,rely=0.15)
+
+    def sl():
+        global slprone
+        global slproide
+        global slprope
+        global slproqe
+        global slproae
+        sl_frame=CTkFrame(homewin_page,width=950,height=380,fg_color="white",corner_radius=20)
+        sl_frame.place(relx=0.2,rely=0.4)
+
+        def cal_sl():
+            try:
+                product_price = int(slprope.get()) if slprope.get() else 0
+                product_quantity = int(slproqe.get()) if slproqe.get() else 0
+                product_amount = product_price * product_quantity
+                slproae.configure(state="normal")  # Allow modification
+                slproae.delete(0, END)
+                slproae.insert(0, str(product_amount))
+                slproae.configure(state="readonly")  # Make it read-only again
+            except ValueError:
+                slproae.configure(state="normal")
+                slproae.delete(0, END)
+                slproae.insert(0, "Invalid")
+                slproae.configure(state="readonly")
+        def sal_close_window():
+            sl_frame.destroy()   
+        slpronl=CTkLabel(sl_frame,text="Product Name",font=("times new roman",30,"bold"),text_color="black")
+        slpronl.place(relx=0.02,rely=0.10)
+
+        slprone=CTkEntry(sl_frame,font=("times new roman",30,"bold"),width=250)
+        slprone.place(relx=0.3,rely=0.10)
+
+        slproidl=CTkLabel(sl_frame,text="Product ID",font=("times new roman",30,"bold"),text_color="black")
+        slproidl.place(relx=0.02,rely=0.30)
+
+        slproide=CTkEntry(sl_frame,font=("times new roman",30,"bold"),width=250)
+        slproide.place(relx=0.3,rely=0.30)
+
+        slpropl=CTkLabel(sl_frame,text="Product Price",font=("times new roman",30,"bold"),text_color="black")
+        slpropl.place(relx=0.02,rely=0.50)
+        
+
+        slprope=CTkEntry(sl_frame,font=("times new roman",30,"bold"),width=250)
+        slprope.place(relx=0.3,rely=0.50)
+        slprope.bind("<KeyRelease>",lambda event: cal_sl())
+
+        slproql=CTkLabel(sl_frame,text="Product Quantity",font=("times new roman",30,"bold"),text_color="black")
+        slproql.place(relx=0.02,rely=0.70)
+
+        slproqe=CTkEntry(sl_frame,font=("times new roman",30,"bold"),width=250)
+        slproqe.place(relx=0.3,rely=0.70)
+        slproqe.bind("<KeyRelease>",lambda event: cal_sl())
+
+        
+        slproal=CTkLabel(sl_frame,text="Total Amount",font=("times new roman",30,"bold"),text_color="black")
+        slproal.place(relx=0.6,rely=0.15)
+
+        slproae=CTkEntry(sl_frame,font=("times new roman",30,"bold"),width=250,height=150)
+        slproae.configure(state="readonly")
+        slproae.place(relx=0.6,rely=0.25)
+
+        slprocb = CTkButton(sl_frame, text="Cancel",font=("inter", 15,),width=100, height=50,command=sal_close_window)
+        slprocb.place(relx=0.6, rely=0.80)
+
+        slproadb = CTkButton(sl_frame, text="Add",font=("inter", 15,),width=100, height=50,command=slr)
+        slproadb.place(relx=0.8, rely=0.80)
+
+
+    salnew_txt = "Add New Sales"
+    salnewb = CTkButton(sales_frame, text=salnew_txt,font=("inter", 15),width=80, height=35,command=sl)
+    salnewb.place(relx=0.75, rely=0.15)
+
+
+def cusd():
+    product_name=cusprone.get()
+    product_id=cusproide.get()
+    customer_name=cusproce.get()
+    product_price=cusprope.get()
+    product_quantity=cusproqe.get()
+    product_amount=cusproae.get()
+    customer_contact=cuscone.get()
+    
+    customer_data={
+        "product_name":product_name,
+        "product_id":product_id,
+        "customer_name":customer_name,
+        "product_price":product_price,
+        "product_quantity":product_quantity,
+        "product_amount":product_amount,
+        "customer_contact":customer_contact
+    }
+    db.customer.insert_one(customer_data)
+    messagebox.showinfo("Customers","Customers Add Successful")
+    
+############### customer ########################################  
+def customer():
+    
+    pass
+    customer_frame = CTkFrame(homewin_page, width=1500, height=600,fg_color="black")
+    customer_frame.place(relx=0.01, rely=0.23)
+
+    cus_txt = "Customer"
+    cusl = CTkLabel(customer_frame, text=cus_txt, font=("inter", 30, "bold"), text_color="white")
+    cusl.place(relx=0.02,rely=0.10)
+
+    def cus():
+        global cusprone
+        global cusproide
+        global cusproce
+        global cusprope
+        global cusproqe
+        global cusproae
+        global cuscone
+        cus_frame=CTkFrame(homewin_page,width=950,height=380,fg_color="white",corner_radius=20)
+        cus_frame.place(relx=0.2,rely=0.4)
+
+        def cal_cus():
+            product_name=cusprone.get()
+            product_id=cusproide.get()
+            cus_name=cusproce.get()
+            product_price=cusprope.get()
+            product_quantity=cusproqe.get()
+            if not product_price:  # If empty, set to zero
+                product_price = "0"
+            if not product_quantity:
+                product_quantity = "0"
+
+            cus_con=cuscone.get()
+            product_amount=int(product_price)*int(product_quantity)
+            cusproae.delete(0, END)
+            cusproae.insert(0, str(product_amount))
+        def cus_close_window():
+            cus_frame.destroy()   
+        
+         
+        cuspronl=CTkLabel(cus_frame,text="Product Name",font=("times new roman",20,"bold"),text_color="black")
+        cuspronl.place(relx=0.02,rely=0.10)
+
+        cusprone=CTkEntry(cus_frame,font=("times new roman",20,"bold"),width=250)
+        cusprone.place(relx=0.2,rely=0.10)
+
+        cusproidl=CTkLabel(cus_frame,text="Product ID",font=("times new roman",20,"bold"),text_color="black")
+        cusproidl.place(relx=0.02,rely=0.30)
+
+        cusproide=CTkEntry(cus_frame,font=("times new roman",20,"bold"),width=250)
+        cusproide.place(relx=0.2,rely=0.30)
+
+        cusprocl=CTkLabel(cus_frame,text="Customer Name",font=("times new roman",20,"bold"),text_color="black")
+        cusprocl.place(relx=0.02,rely=0.50)
+
+        cusproce=CTkEntry(cus_frame,font=("times new roman",20,"bold"),width=250)
+        cusproce.place(relx=0.2,rely=0.50)
+
+        cuspropl=CTkLabel(cus_frame,text="Product price",font=("times new roman",20,"bold"),text_color="black")
+        cuspropl.place(relx=0.02,rely=0.70)
+
+        cusprope=CTkEntry(cus_frame,font=("times new roman",20,"bold"),width=250)
+        cusprope.place(relx=0.2,rely=0.70)
+        cusprope.bind("<KeyRelease>",lambda event: cal_cus())
+
+        cusproql=CTkLabel(cus_frame,text="Product Quantity",font=("times new roman",20,"bold"),text_color="black")
+        cusproql.place(relx=0.02,rely=0.90)
+
+        cusproqe=CTkEntry(cus_frame,font=("times new roman",20,"bold"),width=250)
+        cusproqe.place(relx=0.2,rely=0.90)
+        cusproqe.bind("<KeyRelease>",lambda event: cal_cus())
+
+        cusproal=CTkLabel(cus_frame,text="Total Amount",font=("times new roman",20,"bold"),text_color="black")
+        cusproal.place(relx=0.5,rely=0.15)
+
+        cusproae=CTkEntry(cus_frame,font=("times new roman",20,"bold"),width=250)
+        cusproae.place(relx=0.5,rely=0.25)
+
+        cusconl=CTkLabel(cus_frame,text="Customer Contact",font=("times new roman",20,"bold"),text_color="black")
+        cusconl.place(relx=0.5,rely=0.40)
+
+        cuscone=CTkEntry(cus_frame,font=("times new roman",20,"bold"),width=250)
+        cuscone.place(relx=0.5,rely=0.50)
+        
+        cusprocb = CTkButton(cus_frame, text="Cancel",font=("inter", 15,),width=100, height=50,command=cus_close_window)
+        cusprocb.place(relx=0.5, rely=0.80)
+
+        cusproadb = CTkButton(cus_frame, text="Add",font=("inter", 15,),width=100, height=50,command=cusd)
+        cusproadb.place(relx=0.7, rely=0.80)
+
+
+    
+    cusnew_txt = "Add New Customer"
+    cusnewb = CTkButton(customer_frame, text=cusnew_txt,font=("inter", 15),width=80, height=35,command=cus)
+    cusnewb.place(relx=0.75, rely=0.10)
+
+
+loginfun()
